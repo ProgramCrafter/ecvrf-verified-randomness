@@ -1,0 +1,35 @@
+const slice test_alpha = "AB86418916";
+const slice invalid_alpha = "AB86418917";
+const int test_secret = 62965164;
+
+_ __test_full() {
+    (int gas_prove, tuple pi) = invoke_method(ecvrf::rist255::with_secret::prove,
+        [test_secret, test_alpha]);
+    (int gas_check, tuple bt) = invoke_method(ecvrf::rist255::verify_and_hash,
+        [rist255::base(test_secret), test_alpha, pi.first()]);
+    ~dump(4445);
+    ~dump("Random number:"u);
+    ~dump(bt.first());
+    return [gas_prove, gas_check];
+}
+
+() __test_other_alpha() {
+    (int gas_prove, tuple pi) = invoke_method(ecvrf::rist255::with_secret::prove,
+        [test_secret, test_alpha]);
+    invoke_method_expect_fail(ecvrf::rist255::verify_and_hash,
+        [rist255::base(test_secret), invalid_alpha, pi.first()]);
+}
+
+() __test_other_public_key() {
+    (int gas_prove, tuple pi) = invoke_method(ecvrf::rist255::with_secret::prove,
+        [test_secret, test_alpha]);
+    invoke_method_expect_fail(ecvrf::rist255::verify_and_hash,
+        [rist255::base(test_secret ^ (1 << 64)), test_alpha, pi.first()]);
+}
+
+() __test_invalid_public_key() {
+    (int gas_prove, tuple pi) = invoke_method(ecvrf::rist255::with_secret::prove,
+        [test_secret, test_alpha]);
+    invoke_method_expect_fail(ecvrf::rist255::verify_and_hash,
+        [rist255::base(test_secret) ^ (1 << 64), test_alpha, pi.first()]);
+}

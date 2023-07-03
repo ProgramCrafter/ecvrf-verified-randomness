@@ -1,0 +1,295 @@
+"Asm.fif" include
+// automatically generated from `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\error_codes.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\math.func` `C:\Users\Tigr\AppData\Local\toncli\toncli\func-libs\stdlib.func` `D:\TON_FunC\ecvrf-verified-randomness\func\code.fc` 
+PROGRAM{
+  DECLPROC power
+  DECLPROC sqrt
+  DECLPROC avg
+  DECLPROC exp
+  DECLPROC log2
+  DECLPROC ecvrf::rist255::encode_to_curve
+  DECLPROC ecvrf::rist255::generate_challenge
+  105429 DECLMETHOD ecvrf::rist255::verify_and_hash
+  DECLPROC ecvrf::rist255::with_secret::generate_nonce
+  77421 DECLMETHOD ecvrf::rist255::with_secret::prove
+  DECLPROC main
+  power PROCREF:<{
+    //  x exponent
+    OVER	//  x exponent x
+    0 EQINT	//  x exponent _3
+    IFJMP:<{	//  x exponent
+      2DROP	// 
+      0 PUSHINT	//  _4=0
+    }>	//  x exponent
+    DUP	//  x exponent exponent
+    0 EQINT	//  x exponent _6
+    IFJMP:<{	//  x exponent
+      2DROP	// 
+      1 PUSHINT	//  _7=1
+    }>	//  x exponent
+    OVER	//  x counter result
+    WHILE:<{
+      OVER	//  x counter result counter
+      1 GTINT	//  x counter result _11
+    }>DO<{	//  x counter result
+      s2 PUSH	//  x counter result x
+      MUL	//  x counter result
+      SWAP	//  x result counter
+      DEC	//  x result counter
+      SWAP	//  x counter result
+    }>	//  x counter result
+    2 1 BLKDROP2	//  result
+  }>
+  sqrt PROCREF:<{
+    //  x
+    DUP	//  x x
+    0 EQINT	//  x _2
+    IFJMP:<{	//  x
+      DROP	// 
+      0 PUSHINT	//  _3=0
+    }>	//  x
+    DUP	//  x x
+    4 LESSINT	//  x _5
+    IFJMP:<{	//  x
+      DROP	// 
+      1 PUSHINT	//  _6=1
+    }>	//  x
+    DUP	//  x x
+    INC	//  x _9
+    1 RSHIFT#	//  x z
+    OVER	//  x z y
+    WHILE:<{
+      2DUP	//  x z y z y
+      LESS	//  x z y _13
+    }>DO<{	//  x z y
+      DROP	//  x z
+      s0 s1 s0 PUSH3	//  x z y x z
+      DIV	//  x z y _14
+      ROT	//  x y _14 z
+      ADD	//  x y _15
+      1 RSHIFT#	//  x y z
+      SWAP	//  x z y
+    }>	//  x z y
+    2 1 BLKDROP2	//  y
+  }>
+  avg PROCREF:<{
+    //  x y
+    ADD	//  _2
+    1 RSHIFT#	//  _4
+  }>
+  exp PROCREF:<{
+    //  x
+    DUP	//  x x
+    -1 GTINT	//  x _2
+    IF:<{	//  x
+      POW2	//  _3
+    }>ELSE<{	//  x
+      1 PUSHINT	//  x _6=1
+      SWAP	//  _6=1 x
+      NEGATE	//  _6=1 _8
+      RSHIFT	//  _3
+    }>
+  }>
+  log2 PROCREF:<{
+    //  x
+    0 PUSHINT	//  x n=0
+    7 PUSHPOW2	//  x n=0 _3=128
+    exp INLINECALLDICT	//  x n=0 _4
+    s2 s(-1) PUXC	//  x n=0 x _4
+    GEQ	//  x n=0 _5
+    IF:<{	//  x n=0
+      DROP	//  x
+      128 RSHIFT#	//  x
+      7 PUSHPOW2	//  x n
+    }>	//  x n
+    64 PUSHINT	//  x n _10=64
+    exp INLINECALLDICT	//  x n _11
+    s2 s(-1) PUXC	//  x n x _11
+    GEQ	//  x n _12
+    IF:<{	//  x n
+      SWAP	//  n x
+      64 RSHIFT#	//  n x
+      SWAP	//  x n
+      64 ADDCONST	//  x n
+    }>	//  x n
+    32 PUSHINT	//  x n _17=32
+    exp INLINECALLDICT	//  x n _18
+    s2 s(-1) PUXC	//  x n x _18
+    GEQ	//  x n _19
+    IF:<{	//  x n
+      SWAP	//  n x
+      32 RSHIFT#	//  n x
+      SWAP	//  x n
+      32 ADDCONST	//  x n
+    }>	//  x n
+    16 PUSHINT	//  x n _24=16
+    exp INLINECALLDICT	//  x n _25
+    s2 s(-1) PUXC	//  x n x _25
+    GEQ	//  x n _26
+    IF:<{	//  x n
+      SWAP	//  n x
+      16 RSHIFT#	//  n x
+      SWAP	//  x n
+      16 ADDCONST	//  x n
+    }>	//  x n
+    8 PUSHINT	//  x n _31=8
+    exp INLINECALLDICT	//  x n _32
+    s2 s(-1) PUXC	//  x n x _32
+    GEQ	//  x n _33
+    IF:<{	//  x n
+      SWAP	//  n x
+      8 RSHIFT#	//  n x
+      SWAP	//  x n
+      8 ADDCONST	//  x n
+    }>	//  x n
+    4 PUSHINT	//  x n _38=4
+    exp INLINECALLDICT	//  x n _39
+    s2 s(-1) PUXC	//  x n x _39
+    GEQ	//  x n _40
+    IF:<{	//  x n
+      SWAP	//  n x
+      4 RSHIFT#	//  n x
+      SWAP	//  x n
+      4 ADDCONST	//  x n
+    }>	//  x n
+    2 PUSHINT	//  x n _45=2
+    exp INLINECALLDICT	//  x n _46
+    s2 s(-1) PUXC	//  x n x _46
+    GEQ	//  x n _47
+    IF:<{	//  x n
+      SWAP	//  n x
+      2 RSHIFT#	//  n x
+      SWAP	//  x n
+      2 ADDCONST	//  x n
+    }>	//  x n
+    1 PUSHINT	//  x n _52=1
+    exp INLINECALLDICT	//  x n _53
+    s1 s2 XCHG	//  n x _53
+    GEQ	//  n _54
+    IF:<{	//  n
+      INC	//  n
+    }>	//  n
+  }>
+  ecvrf::rist255::encode_to_curve PROCINLINE:<{
+    //  alpha
+    20303849891136681324525629661488428394062162567173534407035628334060069145251 PUSHINT	//  alpha _1=20303849891136681324525629661488428394062162567173534407035628334060069145251
+    107235929123199046790348518627245502398508861330263795416509940799842657457145 PUSHINT	//  alpha _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _2=107235929123199046790348518627245502398508861330263795416509940799842657457145
+    NEWC	//  alpha _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _2=107235929123199046790348518627245502398508861330263795416509940799842657457145 _3
+    256 STU	//  alpha _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _5
+    ROT	//  _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _5 alpha
+    STSLICER	//  _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _6
+    256 STU	//  _8
+    ENDC	//  _9
+    CTOS	//  _10
+    ONE HASHEXT_SHA512 UNPAIR RIST255_FROMHASH	//  _11
+  }>
+  ecvrf::rist255::generate_challenge PROCINLINE:<{
+    //  y_point h_point gamma_point u_point v_point
+    SWAP
+    NEWC	//  y_point h_point gamma_point v_point u_point _5
+    256 STU	//  y_point h_point gamma_point v_point _7
+    256 STU	//  y_point h_point gamma_point _9
+    ENDC	//  y_point h_point gamma_point _10
+    s0 s3 XCHG
+    NEWC	//  _10 h_point gamma_point y_point _11
+    256 STU	//  _10 h_point gamma_point _13
+    s1 s2 XCHG	//  _10 gamma_point h_point _13
+    256 STU	//  _10 gamma_point _15
+    256 STU	//  _10 _17
+    STREF	//  _18
+    ENDC	//  _19
+    HASHCU	//  _20
+    128 MODPOW2#	//  _22
+  }>
+  ecvrf::rist255::verify_and_hash PROCINLINE:<{
+    //  public_key alpha pi
+    s2 PUSH	//  public_key alpha pi public_key
+    RIST255_VALIDATE
+    256 LDU	//  public_key alpha gamma pi
+    OVER	//  public_key alpha gamma pi gamma
+    RIST255_VALIDATE
+    128 LDU	//  public_key alpha gamma c pi
+    256 LDU	//  public_key alpha gamma c _48 _47
+    DROP	//  public_key alpha gamma c s
+    s0 s3 XCHG	//  public_key s gamma c alpha
+    ecvrf::rist255::encode_to_curve INLINECALLDICT	//  public_key s gamma c h
+    s3 PUSH	//  public_key s gamma c h s
+    RIST255_MULBASE	//  public_key s gamma c h _20
+    s5 s2 PUSH2	//  public_key s gamma c h _20 public_key c
+    RIST255_MUL	//  public_key s gamma c h _20 _21
+    RIST255_SUB	//  public_key s gamma c h U
+    s1 s4 PUXC	//  public_key U gamma c h h s
+    RIST255_MUL	//  public_key U gamma c h _24
+    2OVER	//  public_key U gamma c h _24 gamma c
+    RIST255_MUL	//  public_key U gamma c h _24 _25
+    RIST255_SUB	//  public_key U gamma c h V
+    s3 s5 XCHG
+    s5 s0 s2 PUXC2
+    s5 s5 XCHG2	//  gamma c public_key h gamma U V
+    ecvrf::rist255::generate_challenge INLINECALLDICT	//  gamma c c'
+    EQUAL	//  gamma _30
+    100 THROWIFNOT
+    32715952352959511962369602248680254035028756667399615059966433828224140486573 PUSHINT	//  gamma _32=32715952352959511962369602248680254035028756667399615059966433828224140486573
+    107235929123199046790348518627245502398508861330263795416509940799842657457145 PUSHINT	//  gamma _32=32715952352959511962369602248680254035028756667399615059966433828224140486573 _33=107235929123199046790348518627245502398508861330263795416509940799842657457145
+    NEWC	//  gamma _32=32715952352959511962369602248680254035028756667399615059966433828224140486573 _33=107235929123199046790348518627245502398508861330263795416509940799842657457145 _34
+    256 STU	//  gamma _32=32715952352959511962369602248680254035028756667399615059966433828224140486573 _36
+    s1 s2 XCHG	//  _32=32715952352959511962369602248680254035028756667399615059966433828224140486573 gamma _36
+    256 STU	//  _32=32715952352959511962369602248680254035028756667399615059966433828224140486573 _38
+    256 STU	//  _40
+    ENDC	//  _41
+    HASHCU	//  _42
+  }>
+  ecvrf::rist255::with_secret::generate_nonce PROCINLINE:<{
+    //  secret h_point
+    SWAP
+    NEWC	//  h_point secret _2
+    256 STU	//  h_point _4
+    ENDC	//  h_point _5
+    HASHCU	//  h_point _6
+    128 RSHIFT#	//  h_point _8
+    NEWC	//  h_point _8 _9
+    128 STU	//  h_point _11
+    256 STU	//  _13
+    ENDC	//  _14
+    HASHCU	//  _15
+    RIST255_PUSHL	//  _15 _16
+    MOD	//  _17
+  }>
+  ecvrf::rist255::with_secret::prove PROC:<{
+    //  secret alpha
+    OVER	//  secret alpha secret
+    RIST255_MULBASE	//  secret alpha public_key
+    SWAP	//  secret public_key alpha
+    ecvrf::rist255::encode_to_curve INLINECALLDICT	//  secret public_key h
+    s0 s2 PUSH2	//  secret public_key h h secret
+    RIST255_MUL	//  secret public_key h gamma
+    s3 s1 PUSH2	//  secret public_key h gamma secret h
+    ecvrf::rist255::with_secret::generate_nonce INLINECALLDICT	//  secret public_key h gamma k
+    DUP	//  secret public_key h gamma k k
+    RIST255_MULBASE	//  secret public_key h gamma k _11
+    s3 s1 PUSH2	//  secret public_key h gamma k _11 h k
+    RIST255_MUL	//  secret public_key h gamma k _11 _12
+    s3 PUSH
+    s4 s6 XCHG
+    s3 s5 XCHG
+    -ROT	//  secret gamma k public_key h gamma _11 _12
+    ecvrf::rist255::generate_challenge INLINECALLDICT	//  secret gamma k c
+    s0 s3 PUXC	//  c gamma k c secret
+    MUL	//  c gamma k _15
+    ADD	//  c gamma _16
+    RIST255_PUSHL	//  c gamma _16 _17
+    MOD	//  c gamma s
+    SWAP
+    NEWC	//  c s gamma _19
+    256 STU	//  c s _21
+    s1 s2 XCHG	//  s c _21
+    128 STU	//  s _23
+    256 STU	//  _25
+    ENDC	//  _26
+    CTOS	//  _27
+  }>
+  main PROC:<{
+    // 
+  }>
+}END>c
+
+boc>B "build/boc/contract.boc" B>file
