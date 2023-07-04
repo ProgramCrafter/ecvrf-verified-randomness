@@ -10,24 +10,13 @@ challenge_mod = 2**128
 rist255_order = 2**252 + 27742317777372353535851937790883648493
 
 def generate_challenge(y: bytes, h: bytes, gamma: bytes, u: bytes, v: bytes) -> int:
-    return int.from_bytes(begin_cell()
-        .store_bytes(y)
-        .store_bytes(h)
-        .store_bytes(gamma)
-        .store_ref(begin_cell().store_bytes(u).store_bytes(v).end_cell())
-        .end_cell()
-        .bytes_hash(), 'big') % challenge_mod
+    return int.from_bytes(hashlib.sha256(y + h + gamma + u + v).digest(), 'big') % challenge_mod
 
 def generate_nonce(secret: int, h_point: bytes) -> int:
-    secret_hash = begin_cell().store_uint(secret, 256).end_cell().bytes_hash()
-    return int.from_bytes(begin_cell()
-        .store_uint(
-            int.from_bytes(secret_hash, 'big') >> 128,
-            128
-        )
-        .store_bytes(h_point)
-        .end_cell()
-        .bytes_hash(), 'big') % rist255_order
+    secret_hash = hashlib.sha256(secret.to_bytes(32, 'big')).digest()
+    return int.from_bytes(
+        hashlib.sha256(secret_hash[:16] + h_point).digest(), 'big'
+    ) % rist255_order
 
 def prove(secret: int, alpha: bytes) -> Cell:
     secret_bytes = secret.to_bytes(crypto_core_ristretto255_SCALARBYTES, 'little')

@@ -67,6 +67,7 @@ PROGRAM{
   DECLPROC ecvrf::rist255::with_secret::generate_nonce
   77421 DECLMETHOD ecvrf::rist255::with_secret::prove
   DECLPROC main
+  DECLPROC as_builder
   DECLPROC __test_full
   DECLPROC __test_other_alpha
   DECLPROC __test_other_public_key
@@ -2021,29 +2022,25 @@ PROGRAM{
     NEWC	//  alpha _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _2=107235929123199046790348518627245502398508861330263795416509940799842657457145 _3
     256 STU	//  alpha _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _5
     ROT	//  _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _5 alpha
-    STSLICER	//  _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _6
+    STBR	//  _1=20303849891136681324525629661488428394062162567173534407035628334060069145251 _6
     256 STU	//  _8
-    ENDC	//  _9
-    CTOS	//  _10
-    ONE HASHEXT_SHA512 UNPAIR RIST255_FROMHASH	//  _11
+    ONE HASHEXT_SHA512 UNPAIR RIST255_FROMHASH	//  _9
   }>
   ecvrf::rist255::generate_challenge PROCINLINE:<{
     //  y_point h_point gamma_point u_point v_point
+    s0 s4 XCHG
+    NEWC	//  v_point h_point gamma_point u_point y_point _5
+    256 STU	//  v_point h_point gamma_point u_point _7
+    s1 s3 XCHG	//  v_point u_point gamma_point h_point _7
+    256 STU	//  v_point u_point gamma_point _9
+    256 STU	//  v_point u_point _11
     SWAP
-    NEWC	//  y_point h_point gamma_point v_point u_point _5
-    256 STU	//  y_point h_point gamma_point v_point _7
-    256 STU	//  y_point h_point gamma_point _9
-    ENDC	//  y_point h_point gamma_point _10
-    s0 s3 XCHG
-    NEWC	//  _10 h_point gamma_point y_point _11
-    256 STU	//  _10 h_point gamma_point _13
-    s1 s2 XCHG	//  _10 gamma_point h_point _13
-    256 STU	//  _10 gamma_point _15
-    256 STU	//  _10 _17
-    STREF	//  _18
-    ENDC	//  _19
-    HASHCU	//  _20
-    128 MODPOW2#	//  _22
+    NEWC	//  v_point _11 u_point _12
+    256 STU	//  v_point _11 _14
+    s1 s2 XCHG	//  _11 v_point _14
+    256 STU	//  _11 _16
+    TWO HASHEXT_SHA256	//  _17
+    128 MODPOW2#	//  _19
   }>
   ecvrf::rist255::verify_and_hash PROCINLINE:<{
     //  public_key alpha pi
@@ -2053,23 +2050,23 @@ PROGRAM{
     OVER	//  public_key alpha gamma pi gamma
     RIST255_VALIDATE
     128 LDU	//  public_key alpha gamma c pi
-    256 LDU	//  public_key alpha gamma c _48 _47
+    256 LDU	//  public_key alpha gamma c _47 _46
     DROP	//  public_key alpha gamma c s
     s0 s3 XCHG	//  public_key s gamma c alpha
     ecvrf::rist255::encode_to_curve INLINECALLDICT	//  public_key s gamma c h
-    s3 PUSH	//  public_key s gamma c h s
-    RIST255_MULBASE	//  public_key s gamma c h _20
-    s5 s2 PUSH2	//  public_key s gamma c h _20 public_key c
+    s0 s3 PUSH2	//  public_key s gamma c h h s
+    RIST255_MUL	//  public_key s gamma c h _20
+    2OVER	//  public_key s gamma c h _20 gamma c
     RIST255_MUL	//  public_key s gamma c h _20 _21
-    RIST255_SUB	//  public_key s gamma c h U
-    s1 s4 PUXC	//  public_key U gamma c h h s
-    RIST255_MUL	//  public_key U gamma c h _24
-    2OVER	//  public_key U gamma c h _24 gamma c
-    RIST255_MUL	//  public_key U gamma c h _24 _25
-    RIST255_SUB	//  public_key U gamma c h V
+    RIST255_SUB	//  public_key s gamma c h V
+    s0 s4 XCHG	//  public_key V gamma c h s
+    RIST255_MULBASE	//  public_key V gamma c h _24
+    s5 s2 PUSH2	//  public_key V gamma c h _24 public_key c
+    RIST255_MUL	//  public_key V gamma c h _24 _25
+    RIST255_SUB	//  public_key V gamma c h U
     s3 s5 XCHG
     s5 s0 s2 PUXC2
-    s5 s5 XCHG2	//  gamma c public_key h gamma U V
+    s0 s5 XCHG	//  gamma c public_key h gamma U V
     ecvrf::rist255::generate_challenge INLINECALLDICT	//  gamma c c'
     EQUAL	//  gamma _30
     100 THROWIFNOT
@@ -2080,60 +2077,65 @@ PROGRAM{
     s1 s2 XCHG	//  _32=32715952352959511962369602248680254035028756667399615059966433828224140486573 gamma _36
     256 STU	//  _32=32715952352959511962369602248680254035028756667399615059966433828224140486573 _38
     256 STU	//  _40
-    ENDC	//  _41
-    HASHCU	//  _42
+    ONE HASHEXT_SHA256	//  _41
   }>
   ecvrf::rist255::with_secret::generate_nonce PROCINLINE:<{
     //  secret h_point
     SWAP
     NEWC	//  h_point secret _2
     256 STU	//  h_point _4
-    ENDC	//  h_point _5
-    HASHCU	//  h_point _6
-    128 RSHIFT#	//  h_point _8
-    NEWC	//  h_point _8 _9
-    128 STU	//  h_point _11
-    256 STU	//  _13
-    ENDC	//  _14
-    HASHCU	//  _15
-    RIST255_PUSHL	//  _15 _16
-    MOD	//  _17
+    ONE HASHEXT_SHA256	//  h_point _5
+    128 RSHIFT#	//  h_point _7
+    NEWC	//  h_point _7 _8
+    128 STU	//  h_point _10
+    256 STU	//  _12
+    ONE HASHEXT_SHA256	//  _13
+    RIST255_PUSHL	//  _13 _14
+    MOD	//  _15
   }>
   ecvrf::rist255::with_secret::prove PROC:<{
     //  secret alpha
     OVER	//  secret alpha secret
     RIST255_MULBASE	//  secret alpha public_key
-    SWAP	//  secret public_key alpha
+    NEWC
+    ROT	//  secret public_key _5 alpha
+    STSLICER	//  secret public_key _6
     ecvrf::rist255::encode_to_curve INLINECALLDICT	//  secret public_key h
     s0 s2 PUSH2	//  secret public_key h h secret
     RIST255_MUL	//  secret public_key h gamma
     s3 s1 PUSH2	//  secret public_key h gamma secret h
     ecvrf::rist255::with_secret::generate_nonce INLINECALLDICT	//  secret public_key h gamma k
     DUP	//  secret public_key h gamma k k
-    RIST255_MULBASE	//  secret public_key h gamma k _11
-    s3 s1 PUSH2	//  secret public_key h gamma k _11 h k
-    RIST255_MUL	//  secret public_key h gamma k _11 _12
+    RIST255_MULBASE	//  secret public_key h gamma k _13
+    s3 s1 PUSH2	//  secret public_key h gamma k _13 h k
+    RIST255_MUL	//  secret public_key h gamma k _13 _14
     s3 PUSH
     s4 s6 XCHG
     s3 s5 XCHG
-    -ROT	//  secret gamma k public_key h gamma _11 _12
+    -ROT	//  secret gamma k public_key h gamma _13 _14
     ecvrf::rist255::generate_challenge INLINECALLDICT	//  secret gamma k c
     s0 s3 PUXC	//  c gamma k c secret
-    MUL	//  c gamma k _15
-    ADD	//  c gamma _16
-    RIST255_PUSHL	//  c gamma _16 _17
+    MUL	//  c gamma k _17
+    ADD	//  c gamma _18
+    RIST255_PUSHL	//  c gamma _18 _19
     MOD	//  c gamma s
     SWAP
-    NEWC	//  c s gamma _19
-    256 STU	//  c s _21
-    s1 s2 XCHG	//  s c _21
-    128 STU	//  s _23
-    256 STU	//  _25
-    ENDC	//  _26
-    CTOS	//  _27
+    NEWC	//  c s gamma _21
+    256 STU	//  c s _23
+    s1 s2 XCHG	//  s c _23
+    128 STU	//  s _25
+    256 STU	//  _27
+    ENDC	//  _28
+    CTOS	//  _29
   }>
   main PROC:<{
     // 
+  }>
+  as_builder PROC:<{
+    //  v
+    NEWC	//  v _1
+    SWAP	//  _1 v
+    STSLICER	//  _2
   }>
   __test_full PROC:<{
     // 
@@ -2150,21 +2152,22 @@ PROGRAM{
     62965164 PUSHINT	//  gas_prove pi _9 _11=62965164
     RIST255_MULBASE	//  gas_prove pi _9 _12
     x{41423836343138393136} PUSHSLICE	//  gas_prove pi _9 _12 _13
-    s0 s3 XCHG	//  gas_prove _13 _9 _12 pi
-    FIRST	//  gas_prove _13 _9 _12 _14
-    s1 s3 s0 XCHG3	//  gas_prove _9 _12 _13 _14
+    as_builder CALLDICT	//  gas_prove pi _9 _12 _14
+    s0 s3 XCHG	//  gas_prove _14 _9 _12 pi
+    FIRST	//  gas_prove _14 _9 _12 _15
+    s1 s3 s0 XCHG3	//  gas_prove _9 _12 _14 _15
     TRIPLE	//  gas_prove _9 _10
     invoke_method CALLDICT	//  gas_prove gas_check bt
-    4445 PUSHINT	//  gas_prove gas_check bt _16=4445
-    s0 DUMP	//  gas_prove gas_check bt _17
+    4445 PUSHINT	//  gas_prove gas_check bt _17=4445
+    s0 DUMP	//  gas_prove gas_check bt _18
     DROP	//  gas_prove gas_check bt
-    1670876884033178636567659839582778 PUSHINT	//  gas_prove gas_check bt _18=1670876884033178636567659839582778
-    s0 DUMP	//  gas_prove gas_check bt _19
+    1670876884033178636567659839582778 PUSHINT	//  gas_prove gas_check bt _19=1670876884033178636567659839582778
+    s0 DUMP	//  gas_prove gas_check bt _20
     DROP	//  gas_prove gas_check bt
-    FIRST	//  gas_prove gas_check _20
-    s0 DUMP	//  gas_prove gas_check _21
+    FIRST	//  gas_prove gas_check _21
+    s0 DUMP	//  gas_prove gas_check _22
     DROP	//  gas_prove gas_check
-    PAIR	//  _22
+    PAIR	//  _23
   }>
   __test_other_alpha PROC:<{
     // 
@@ -2174,7 +2177,7 @@ PROGRAM{
     62965164 PUSHINT	//  _2 _4=62965164
     x{41423836343138393136} PUSHSLICE	//  _2 _4=62965164 _5
     PAIR	//  _2 _3
-    invoke_method CALLDICT	//  _14 _15
+    invoke_method CALLDICT	//  _15 _16
     NIP	//  pi
     CONT:<{
       ecvrf::rist255::verify_and_hash CALLDICT
@@ -2182,11 +2185,12 @@ PROGRAM{
     62965164 PUSHINT	//  pi _7 _9=62965164
     RIST255_MULBASE	//  pi _7 _10
     x{41423836343138393137} PUSHSLICE	//  pi _7 _10 _11
-    s0 s3 XCHG	//  _11 _7 _10 pi
-    FIRST	//  _11 _7 _10 _12
-    s1 s3 s0 XCHG3	//  _7 _10 _11 _12
+    as_builder CALLDICT	//  pi _7 _10 _12
+    s0 s3 XCHG	//  _12 _7 _10 pi
+    FIRST	//  _12 _7 _10 _13
+    s1 s3 s0 XCHG3	//  _7 _10 _12 _13
     TRIPLE	//  _7 _8
-    invoke_method_expect_fail CALLDICT	//  _13
+    invoke_method_expect_fail CALLDICT	//  _14
     DROP	// 
   }>
   __test_other_public_key PROC:<{
@@ -2197,7 +2201,7 @@ PROGRAM{
     62965164 PUSHINT	//  _2 _4=62965164
     x{41423836343138393136} PUSHSLICE	//  _2 _4=62965164 _5
     PAIR	//  _2 _3
-    invoke_method CALLDICT	//  _18 _19
+    invoke_method CALLDICT	//  _19 _20
     NIP	//  pi
     CONT:<{
       ecvrf::rist255::verify_and_hash CALLDICT
@@ -2205,11 +2209,12 @@ PROGRAM{
     18446744073772516780 PUSHINT	//  pi _7 _13
     RIST255_MULBASE	//  pi _7 _14
     x{41423836343138393136} PUSHSLICE	//  pi _7 _14 _15
-    s0 s3 XCHG	//  _15 _7 _14 pi
-    FIRST	//  _15 _7 _14 _16
-    s1 s3 s0 XCHG3	//  _7 _14 _15 _16
+    as_builder CALLDICT	//  pi _7 _14 _16
+    s0 s3 XCHG	//  _16 _7 _14 pi
+    FIRST	//  _16 _7 _14 _17
+    s1 s3 s0 XCHG3	//  _7 _14 _16 _17
     TRIPLE	//  _7 _8
-    invoke_method_expect_fail CALLDICT	//  _17
+    invoke_method_expect_fail CALLDICT	//  _18
     DROP	// 
   }>
   __test_invalid_public_key PROC:<{
@@ -2220,7 +2225,7 @@ PROGRAM{
     62965164 PUSHINT	//  _2 _4=62965164
     x{41423836343138393136} PUSHSLICE	//  _2 _4=62965164 _5
     PAIR	//  _2 _3
-    invoke_method CALLDICT	//  _18 _19
+    invoke_method CALLDICT	//  _19 _20
     NIP	//  pi
     CONT:<{
       ecvrf::rist255::verify_and_hash CALLDICT
@@ -2230,11 +2235,12 @@ PROGRAM{
     64 PUSHPOW2	//  pi _7 _10 _13
     XOR	//  pi _7 _14
     x{41423836343138393136} PUSHSLICE	//  pi _7 _14 _15
-    s0 s3 XCHG	//  _15 _7 _14 pi
-    FIRST	//  _15 _7 _14 _16
-    s1 s3 s0 XCHG3	//  _7 _14 _15 _16
+    as_builder CALLDICT	//  pi _7 _14 _16
+    s0 s3 XCHG	//  _16 _7 _14 pi
+    FIRST	//  _16 _7 _14 _17
+    s1 s3 s0 XCHG3	//  _7 _14 _16 _17
     TRIPLE	//  _7 _8
-    invoke_method_expect_fail CALLDICT	//  _17
+    invoke_method_expect_fail CALLDICT	//  _18
     DROP	// 
   }>
   __test_rbcl_impl PROC:<{
@@ -2245,15 +2251,16 @@ PROGRAM{
     62965164 PUSHINT	//  _2 _4=62965164
     RIST255_MULBASE	//  _2 _5
     x{41423836343138393136} PUSHSLICE	//  _2 _5 _6
-    B{b5ee9c724101010100520000a0c017321dd664c419ed022b98ae8d9508005cce1484124b2bc0981747c27e3a46cc786f11f03b903502fbaa09e11f97320c90c0477c57291e96360190b9000764c8d6c6fbdd5cad414a98da37ab3eb019ab17c885}
-    B>boc PUSHREF	//  _2 _5 _6 _7
-    CTOS	//  _2 _5 _6 _8
+    as_builder CALLDICT	//  _2 _5 _7
+    B{b5ee9c724101010100520000a0c017321dd664c419ed022b98ae8d9508005cce1484124b2bc0981747c27e3a4631ed876b0eca2721e3fe68504fbe69940a9e8b677ca6d2ea02b3df5124df94bb6deba25528bbd690d75e135f5bf86dee523b9ac3}
+    B>boc PUSHREF	//  _2 _5 _7 _8
+    CTOS	//  _2 _5 _7 _9
     TRIPLE	//  _2 _3
-    invoke_method CALLDICT	//  _15 _16
+    invoke_method CALLDICT	//  _16 _17
     NIP	//  bt
-    FIRST	//  _11
-    39893767252748447031668927136364278831976633384380335029278172822964436328598 PUSHINT	//  _11 _12=39893767252748447031668927136364278831976633384380335029278172822964436328598
-    EQUAL	//  _13
+    FIRST	//  _12
+    76450925097744162208650964512907845758674715636127633408891137707657590793656 PUSHINT	//  _12 _13=76450925097744162208650964512907845758674715636127633408891137707657590793656
+    EQUAL	//  _14
     101 THROWIFNOT
   }>
 }END>c
