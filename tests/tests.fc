@@ -33,3 +33,12 @@ _ __test_full() {
     invoke_method_expect_fail(ecvrf::rist255::verify_and_hash,
         [rist255::base(test_secret) ^ (1 << 64), test_alpha, pi.first()]);
 }
+
+cell rbcl_pi() asm
+  "B{b5ee9c724101010100520000a0c017321dd664c419ed022b98ae8d9508005cce1484124b2bc0981747c27e3a46cc786f11f03b903502fbaa09e11f97320c90c0477c57291e96360190b9000764c8d6c6fbdd5cad414a98da37ab3eb019ab17c885}"
+  "B>boc PUSHREF";
+() __test_rbcl_impl() {
+    (int gas_check, tuple bt) = invoke_method(ecvrf::rist255::verify_and_hash,
+        [rist255::base(test_secret), test_alpha, rbcl_pi().begin_parse()]);
+    throw_unless(101, bt.first() == 0x58331274ae0bf14b95c5765074c9c96e61cca169001405cd3f9be30c19f9e096);
+}

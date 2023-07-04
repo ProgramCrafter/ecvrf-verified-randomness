@@ -71,6 +71,7 @@ PROGRAM{
   DECLPROC __test_other_alpha
   DECLPROC __test_other_public_key
   DECLPROC __test_invalid_public_key
+  DECLPROC __test_rbcl_impl
   power PROCREF:<{
     //  x exponent
     OVER	//  x exponent x
@@ -2235,5 +2236,24 @@ PROGRAM{
     TRIPLE	//  _7 _8
     invoke_method_expect_fail CALLDICT	//  _17
     DROP	// 
+  }>
+  __test_rbcl_impl PROC:<{
+    // 
+    CONT:<{
+      ecvrf::rist255::verify_and_hash CALLDICT
+    }>	//  _2
+    62965164 PUSHINT	//  _2 _4=62965164
+    RIST255_MULBASE	//  _2 _5
+    x{41423836343138393136} PUSHSLICE	//  _2 _5 _6
+    B{b5ee9c724101010100520000a0c017321dd664c419ed022b98ae8d9508005cce1484124b2bc0981747c27e3a46cc786f11f03b903502fbaa09e11f97320c90c0477c57291e96360190b9000764c8d6c6fbdd5cad414a98da37ab3eb019ab17c885}
+    B>boc PUSHREF	//  _2 _5 _6 _7
+    CTOS	//  _2 _5 _6 _8
+    TRIPLE	//  _2 _3
+    invoke_method CALLDICT	//  _15 _16
+    NIP	//  bt
+    FIRST	//  _11
+    39893767252748447031668927136364278831976633384380335029278172822964436328598 PUSHINT	//  _11 _12=39893767252748447031668927136364278831976633384380335029278172822964436328598
+    EQUAL	//  _13
+    101 THROWIFNOT
   }>
 }END>c
